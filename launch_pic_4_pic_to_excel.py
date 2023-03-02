@@ -27,6 +27,57 @@ cursor.execute(query)
 # Fetch data
 rows = cursor.fetchall()
 
+def func_update_petit(data_json):
+    json_array_update = json.dumps(data_json)
+    # Define the SQL query to update data
+    sql_update = "UPDATE tb_kanca SET pet_it = %s WHERE kode_kanca = %s"
+
+    # Define the values to be updated
+    values_update = (json_array_update,  row[0])
+
+    # Execute the SQL query with values
+    cursor.execute(sql_update, values_update)
+
+    # Commit the changes to the database
+    conx.commit()
+
+    # Print the number of rows affected by the update
+    print(cursor.rowcount, "record(s) updated")
+    return 1
+
+def func_filter_else(name_replace):
+    result_split = re.split('//', name_replace)
+
+    result_grp = re.search(r'[a-zA-Z\s]+', result_split[0])
+    name_pic = result_grp.group()
+
+    number_pic = re.findall(r'\d+', result_split[0])
+    number_pic_merge = ''.join(number_pic)
+    new_phone_number = number_pic_merge.replace("08", str('628'), 1)
+
+    if len(new_phone_number) < 14 and result_split[1] != "":
+        result_grp_2 = re.search(r'[a-zA-Z\s]+', result_split[1])
+        name_pic_2 = result_grp_2.group()
+
+        number_pic_2 = re.findall(r'\d+', result_split[1])
+        number_pic_merge_2 = ''.join(number_pic_2)
+        new_phone_number_2 = number_pic_merge_2.replace("08", str('628'), 1)
+
+        data_json = [
+            {
+                'name':name_pic,
+                'number':[new_phone_number]
+            },
+            {
+                'name':name_pic_2,
+                'number':[new_phone_number_2]
+            }
+        ]
+        data_return = ['1', data_json]
+        return data_return
+    data_return = ['0', name_replace]
+    return data_return
+
 # Print data
 if rows:
     data_array = []
@@ -35,7 +86,7 @@ if rows:
         if row[1] is not None:  # proses data pic_pinca is not null
             result = re.findall(r'\d+', row[1])  # find number in string
             phone_number = ''.join(result)  # merge phone number spacing
-            new_phone_number = phone_number.replace("0", str('62'), 1)
+            new_phone_number = phone_number.replace("08", str('628'), 1)
 
             name_pic_split = row[1]
             name_replace = name_pic_split.replace("|", str('/'))
@@ -43,7 +94,7 @@ if rows:
             result_grp = re.search(r'[a-zA-Z\s]+', result_split[0])
 
             count_num_phone = len(new_phone_number)  # count long number
-            if result_grp != None:
+            if result_grp != None and name_pic_split[0:2] != "[{":
                 if count_num_phone <= 14:  # if one number phone
                     result_grp = re.search(r'[a-zA-Z\s]+', result_split[0])
                     name_pic = result_grp.group()
@@ -57,6 +108,7 @@ if rows:
                     data = [row[0],y_json]
                     
                     data_array.append(data)
+                    # func_update_petit(data_json)
                 elif count_num_phone <= 28:
                     result_grp = re.search(r'[a-zA-Z\s]+', result_split[0])
                     name_pic = result_grp.group()
@@ -90,6 +142,7 @@ if rows:
                             data = [row[0],y_json]
 
                             data_array.append(data)
+                            # func_update_petit(data_json)
                         else:
                             print("(2.2)>>> " + name_replace)
                             data_json_else = name_replace
@@ -98,11 +151,25 @@ if rows:
                             data_array_else.append(data_else)
 
                     else:
-                        print("(2.1)>>> " + name_replace)
-                        data_json_else =  name_replace
-                        y_json_else = json.dumps(data_json_else)
-                        data_else = [row[0],y_json_else]
-                        data_array_else.append(data_else)
+                        # print("(2.1)>>> " + name_replace)
+                        # data_json_else =  name_replace
+                        # y_json_else = json.dumps(data_json_else)
+                        # data_else = [row[0],y_json_else]
+                        # data_array_else.append(data_else)
+
+                        data_json = func_filter_else(name_replace)
+                        if data_json[0] == '1':
+                            y_json = json.dumps(data_json[1])
+                            data = [row[0],y_json]
+                            data_array.append(data)
+                            # func_update_petit(data_json[1])
+                        else:
+                            print("(2.1)>>> " + name_replace)
+                            data_json_else =  name_replace
+                            y_json_else = json.dumps(data_json_else)
+                            data_else = [row[0],y_json_else]
+                            data_array_else.append(data_else)
+
 
                 elif count_num_phone <= 42:
                     result_grp = re.search(r'[a-zA-Z\s]+', result_split[0])
@@ -127,9 +194,9 @@ if rows:
                                 if result_grp_3 is not None:
 
                                     name_pic_3 = result_grp_3.group()
-                                    number_pic_3 = re.findall(r'\d+', result_split[1])
+                                    number_pic_3 = re.findall(r'\d+', result_split[2])
                                     number_pic_merge_3 = ''.join(number_pic_3)
-                                    new_phone_number_3 = number_pic_merge_2.replace("08", str('628'), 1)
+                                    new_phone_number_3 = number_pic_merge_3.replace("08", str('628'), 1)
 
                                     data_json = [
                                         {
@@ -149,6 +216,7 @@ if rows:
                                     data = [row[0],y_json]
 
                                     data_array.append(data)
+                                    # func_update_petit(data_json)
                             else:
                                 print("(3.2)>>> " + name_replace)
                                 data_json_else = name_replace
@@ -193,18 +261,18 @@ if rows:
                                 if result_grp_3 is not None:
 
                                     name_pic_3 = result_grp_3.group()
-                                    number_pic_3 = re.findall(r'\d+', result_split[1])
+                                    number_pic_3 = re.findall(r'\d+', result_split[2])
                                     number_pic_merge_3 = ''.join(number_pic_3)
-                                    new_phone_number_3 = number_pic_merge_2.replace("08", str('628'), 1)
+                                    new_phone_number_3 = number_pic_merge_3.replace("08", str('628'), 1)
 
                                     if len(new_phone_number_3) < 14 and result_split[3]:
                                         result_grp_4 = re.search(r'[a-zA-Z\s]+', result_split[3])
                                         if result_grp_4 is not None:
 
                                             name_pic_4 = result_grp_4.group()
-                                            number_pic_4 = re.findall(r'\d+', result_split[1])
+                                            number_pic_4 = re.findall(r'\d+', result_split[3])
                                             number_pic_merge_4 = ''.join(number_pic_4)
-                                            new_phone_number_4 = number_pic_merge_2.replace("08", str('628'), 1)
+                                            new_phone_number_4 = number_pic_merge_4.replace("08", str('628'), 1)
                                         
                                             data_json = [
                                                 {
@@ -228,6 +296,7 @@ if rows:
                                             data = [row[0],y_json]
 
                                             data_array.append(data)
+                                            # func_update_petit(data_json)
                                             # print(data_json)
                                         else:
                                             print("(4.5)>>> " + name_replace)
@@ -274,6 +343,18 @@ if rows:
                     y_json_else = json.dumps(data_json_else)
                     data_else = [row[0],y_json_else]
                     data_array_else.append(data_else)
+            else:
+                print("(Null) " + name_replace)
+                data_json_else = name_replace
+                y_json_else = json.dumps(data_json_else)
+                data_else = [row[0],y_json_else]
+                data_array_else.append(data_else)
+        else:
+            print("(Null) " + name_replace)
+            data_json_else = name_replace
+            y_json_else = json.dumps(data_json_else)
+            data_else = [row[0],y_json_else]
+            data_array_else.append(data_else)
 
     marge_json = data_array + data_array_else
     print(marge_json)

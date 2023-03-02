@@ -1,6 +1,7 @@
 import re
 import mysql.connector
 import json
+import xlsxwriter
 from mysql.connector import errorcode
 
 try:
@@ -39,35 +40,71 @@ if rows:
             if result_grp != None:
                 name_pic = result_grp.group()
                 if count_num_phone <= 14:  # if one number phone
-                    data = {
-                        "nama_pic": name_pic,
-                        "nomer_pic": [new_phone_number]
-                    }
+                    data = [
+                        {
+                            'nama_pic': name_pic,
+                            'nomer_pic': [new_phone_number]
+                        }
+                    ]
                     data_array.append(data)
                 elif count_num_phone <= 28:  # if two number phone
                     new_phone_number2 = phone_number.replace(
                         "08", str('628'), 2)
                     items = new_phone_number2.split("628")
-                    data = {
+                    data = [
+                        {
                         "nama_pic": name_pic,
                         "nomer_pic": ['628'+items[1], '628'+items[2]]
-                    }
+                        }
+                    ]
                     data_array.append(data)
-                else:  # if three number phone
+                elif count_num_phone <= 42:  # if three number phone
                     new_phone_number3 = phone_number.replace(
                         "08", str('628'), 3)
                     items = new_phone_number3.split("628")
-                    data = {
+                    data = [
+                        {
                         "nama_pic": name_pic,
                         "nomer_pic": ['628'+items[1], '628'+items[2], '628'+items[3]]
-                    }
+                        }
+                    ]
                     data_array.append(data)
 
-    marge_json = data_array
-    print(marge_json)
+            # json_array_update = json.dumps(data)
+            # # Define the SQL query to update data
+            # sql_update = "UPDATE tb_kanca SET pic_pinca = %s WHERE kode_kanca = %s"
 
-    with open("data.json", "w") as file:
-        json.dump(marge_json, file)
+            # # Define the values to be updated
+            # values_update = (json_array_update,  row[0])
+
+            # # Execute the SQL query with values
+            # cursor.execute(sql_update, values_update)
+
+            # # Commit the changes to the database
+            # conx.commit()
+
+            # # Print the number of rows affected by the update
+            # print(cursor.rowcount, "record(s) updated")
+
+    # marge_json = data_array
+    # print(marge_json)
+
+    # with open("data.json", "w") as file:
+    #     json.dump(marge_json, file)
+
+    # # Create a new Excel file
+    # workbook = xlsxwriter.Workbook('new_format_pic_pinca.xlsx')
+
+    # # Add a new worksheet to the file
+    # worksheet = workbook.add_worksheet()
+
+    # # Write the data to the worksheet
+    # for row_num, row_data in enumerate(marge_json):
+    #     for col_num, value in enumerate(row_data):
+    #         worksheet.write(row_num, col_num, value)
+
+    # # Save the workbook and close it
+    # workbook.close()
 else:
     print('Not Found!')
 
